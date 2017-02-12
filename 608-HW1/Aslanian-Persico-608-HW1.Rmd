@@ -2,21 +2,17 @@
 title: "Data608-HW1"
 author: "Armenoush Aslanian-Persico"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 Principles of Data Visualization and Introduction to ggplot2
 
-## 1. Show Companies by States.
-
-Create a graph that shows the distribution of companies in the dataset by State (ie how many are in each state).
+## 0. Setup
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-## 1.1. Load Libraries
 
 ```{r libraries, warning=FALSE, message=FALSE}
 library(DT)
@@ -32,6 +28,9 @@ library(stringr)
 library(tidyr)
 ```
 
+## 1. Show Companies by States.
+
+Create a graph that shows the distribution of companies in the dataset by State (ie how many are in each state).
 
 ## 1.2. Load Data from URL
 
@@ -182,3 +181,13 @@ Figure3<- Figure3 + coord_flip()
 Figure3
 ggsave("Figure3.jpg")
 ```
+
+## 4. Conclusion
+
+California, Texas, New York, Virginia and Florida have the highest number of fastest growing companies in this dataset.
+
+Business Products, Consumer Products, and Travel/Hospitality have the highest average number of employees per company. The boxplots indicate that some outliers influenced the means.
+
+Energy, Transportation, Manufacturing, Health, and Business Products have the highest calculated revenue per employee.
+
+The year and source of this dataset is unknown. If multiple years of data were available, this would be a good source of information about industry growth and job availability trends for job seekers. The growth rate variable may be an indicator of this, but would need defining.
