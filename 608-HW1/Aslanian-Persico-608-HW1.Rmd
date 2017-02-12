@@ -1,0 +1,184 @@
+---
+title: "Data608-HW1"
+author: "Armenoush Aslanian-Persico"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Principles of Data Visualization and Introduction to ggplot2
+
+## 1. Show Companies by States.
+
+Create a graph that shows the distribution of companies in the dataset by State (ie how many are in each state).
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.1. Load Libraries
+
+```{r libraries, warning=FALSE, message=FALSE}
+library(DT)
+library(ggplot2)
+library(jsonlite)
+library(knitr)
+library(plyr)
+library(dplyr)
+library(RCurl)
+library(reshape2)
+library(rmarkdown)
+library(stringr)
+library(tidyr)
+```
+
+
+## 1.2. Load Data from URL
+
+```{r loaddata}
+companiescsv<-getURL("https://raw.githubusercontent.com/charleyferrari/CUNY_DATA608/master/lecture1/Data/inc5000_data.csv")
+
+df1<- data.frame(read.csv(text=companiescsv))
+
+datatable(df1, options = list( pageLength = 5, lengthMenu = c(5, 10),  initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#00838f', 'color': '#fff'});", "}"), rownames=TRUE))
+
+```
+
+
+## 1.3. Group Companies by State
+
+```{r groupbystate}
+
+#show data structure
+str(df1)
+
+#group companies by state
+groupbystate <- ddply(df1, .(State), summarize, count = length(Rank))
+
+orderbystate <- groupbystate[order(groupbystate$count), ]
+
+#order by state with most companies
+orderbystate$State <- factor(orderbystate$State, levels = orderbystate$State)  
+```
+
+
+## 1.4 Show Graph of Companies by State.
+
+```{r graphbystate}
+#Create graph of companies by state
+Figure1 <- 
+  ggplot(orderbystate, aes(x = State, y = count)) + 
+  geom_bar(stat = "identity", fill="#ffca28")+
+  coord_flip() + 
+  theme_bw()+
+  ggtitle("Number of Fastest Growing US Companies by State") + 
+  labs(x="State",y="Number of Companies")
+  
+Figure1
+ggsave("Figure1.jpg")
+```
+
+## 2. Show Average Employment by Industry in the Third Ranked State.
+
+Let’s dig in on the State with the 3rd most companies in the data set. Imagine you work for the state and are interested in how many people are employed by companies in different industries employ. Create a plot of average employment by industry for companies in this state (only use cases with full data (user R’s complete.cases() function). Your graph should show how variable the ranges are, and exclude outliers.
+
+## 2.1 Sort States by Count of Companies
+
+```{r sortstates}
+allstates <- as.data.frame(table(df1$State))
+colnames(allstates) <- c("State", "Count")
+
+# sort by descending count
+sortstates <- allstates[order(-allstates$Count),] 
+head(sortstates)
+
+```
+
+## 2.2 Select State with Third Most Companies
+
+```{r selectstate}
+#subset third highest value
+x <- sort(allstates$Count, TRUE)[3] 
+filter(allstates, Count == x)
+
+#filter by resulting state
+nys <- filter(df1, State == "NY")
+
+#subset complete cases only
+nys <- nys[complete.cases(nys),]
+
+#show data structure
+str(nys)
+
+```
+
+## 2.3 Calculate Average Employment by Industry
+
+```{r nysjobs, eval=TRUE}
+
+#Create summary columns for mean and count
+nysjobs <- ddply(nys, .(Industry), summarize,
+    meanemployees = round(mean(Employees),0), 
+    sumemployees = sum(Employees), 
+    countemployers = length(Employees), 
+    meanrevenueperemployee = round(mean(Revenue/Employees),2),
+    meangrowthrate = round(mean(Growth_Rate),2)
+    )
+
+#Show industries with highest average employee count
+nysjobs <- nysjobs[order(nysjobs$meanemployees, decreasing = TRUE),]
+
+#Show calculated data
+datatable(nysjobs, options = list( pageLength = 5, lengthMenu = c(5, 10),  initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#1565c0', 'color': '#fff'});", "}"), rownames=TRUE))
+
+#Create industry factor
+nys$Industry <- factor(nys$Industry, levels = nysjobs$Industry)
+
+#Show nys data
+datatable(nys, options = list( pageLength = 5, lengthMenu = c(5, 10),  initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#283593', 'color': '#fff'});", "}"), rownames=TRUE))
+```
+
+
+## 2.4 Show Graph of Average Employment by Industry.
+
+```{r graphnysjobs}
+
+#Create graph of jobs by industry
+Figure2 <-
+ggplot(nys, aes(x = Industry, y = Employees)) +
+  geom_boxplot() + 
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 5, color = "blue") + 
+  theme_bw()+
+  ggtitle("New York State Average Employment by Industry")
+
+#select limits to hide outliers
+Figure2<- Figure2 + coord_flip(ylim = c(0,1500))
+Figure2
+ggsave("Figure2.jpg")
+```
+
+## 3. Show Highest Revenue Industries.
+
+Now imagine you work for an investor and want to see which industries generate the most revenue per employee. Create a chart makes this information clear.
+
+```{r revenuejobs}
+nysjobs1 <- nysjobs[order(nysjobs$meanrevenueperemployee, decreasing = TRUE),]
+
+#Create graph of jobs by revenue
+Figure3 <-
+ggplot(nysjobs1, aes(x = reorder(Industry,-meanrevenueperemployee), y = meanrevenueperemployee)) +
+  geom_bar(stat = "identity", fill="#ffca28")+
+  theme_bw()+
+  ggtitle("New York State Average Employee Revenue by Industry")+
+  labs(y="Revenue in Dollars",x="Industry")
+
+Figure3<- Figure3 + coord_flip()
+Figure3
+ggsave("Figure3.jpg")
+```
