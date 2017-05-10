@@ -1,0 +1,167 @@
+---
+title: "opendata"
+author: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r 0-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(data.table)
+library(DT)
+library(openxlsx)
+library(dtplyr)
+library(dplyr)
+library(base)
+library(ggplot2)
+library(reshape2)
+```
+
+```{r 1-scrap, eval=FALSE, echo=FALSE}
+#########################################################################
+#START SCRAP
+########################################################################
+
+#df<-read.csv("data1.csv", header=TRUE, sep=",")
+#data.table(head(df))
+#df<- data.frame(read.table("cro2.xlsx", header=TRUE, fill=TRUE))
+#df <-read.csv("cro2.csv", header=TRUE, stringsAsFactors=FALSE)
+#df<-(head(df,10))
+
+#group raw data by agency  #test
+graw<-(df %>%  group_by(AgencyName) %>% summarise(n = n()))
+#display in table
+datatable(graw, options = list( pageLength = 10, lengthMenu = c(10, 20, 40),   initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#01975b', 'color': '#fff'});",
+    "}")), rownames=TRUE)
+
+#group by agency 
+g2<-(df1 %>% 
+  group_by(AgencyName) %>% 
+  summarise(n = n(), mean=mean(ContractAmount))
+
+datatable(g2, options = list( pageLength = 10, lengthMenu = c(10, 20, 40),   initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#01975b', 'color': '#fff'});",
+    "}")), rownames=TRUE)
+#########################################################################
+#END SCRAP
+########################################################################
+```
+
+```{r 1-load-clean-data, eval=FALSE, echo=FALSE}
+########################################################################
+#START EVAL=FALSE
+########################################################################
+
+#import data
+df <- read.xlsx("cro2.xlsx", sheet=1, startRow=1, colNames=TRUE)
+
+#format dates
+df$StartDate<- as.Date(df$StartDate, origin = "1899-12-30")
+df$StartDate<- format(df$StartDate, "%Y")
+df$EndDate<- as.Date(df$EndDate, origin = "1899-12-30")
+df$EndDate<- format(df$EndDate, "%Y")
+
+#replace miscoded characters; combine agencies with multiple names
+df$AgencyName[df$AgencyName == "ADMIN FOR CHILDREN'S SVCS" | df$AgencyName == "ADMIN FOR CHILDREN_x001A_S SVCS" | df$AgencyName == "Administration for Children's Services"] <- "ACS"
+df$AgencyName[df$AgencyName =="HRA/DEPT OF SOCIAL SERVICES"]<-"Human Resources Administration"
+df$AgencyName[df$AgencyName =="Citywide Administrative Services"]<-"DEPT OF CITYWIDE ADMIN SVCS"
+df$AgencyName[df$AgencyName =="Parks and Recreation"]<-"DEPT OF PARKS & RECREATION"
+
+#Selected top 13 agencies by activity volume, excluding elections
+df1<-df[df$AgencyName %in% c("POLICE DEPARTMENT", 
+                        "DEPARTMENT OF EDUCATION ADMIN",
+                        "DEPARTMENT OF SANITATION",
+                        "DEPT OF PARKS & RECREATION",
+                        "Human Resources Administration",
+                        "FIRE DEPARTMENT",
+                        "DEPARTMENT OF CORRECTION",
+                        "DEPT OF HEALTH/MENTAL HYGIENE",
+                        "ACS",
+                        "DEPT OF ENVIRONMENT PROTECTION",
+                        "DEPARTMENT OF TRANSPORTATION",
+                        "DEPT. OF HOMELESS SERVICES",
+                        "DEPT OF CITYWIDE ADMIN SVCS"
+), ]
+
+#Selected Changes in Personnel, Contract Award, Procurement notices only
+df1<-df1[df1$SectionName %in% c("Changes in Personnel", "Contract Award Hearings", "Procurement"),]
+
+#export cleaned data
+write.csv(df1, file = "df1.csv)"
+########################################################################
+#END EVAL=FALSE
+########################################################################
+```
+
+```{r 2-group-agency, echo=FALSE}
+
+#import cleaned data
+df1 <- read.xlsx("df.xlsx", sheet=1, startRow=1, colNames=TRUE)
+
+#group by agency and action type
+t1<-(df1 %>% 
+  group_by(Agency, SectionName,Year) %>% 
+  summarise(n = n() ))
+```
+
+## Data Cleanup: Selected Agencies Only, Grouped by Year
+
+The raw data was grouped by year.
+<br>
+
+Selected agencies:
+<br>
+/// List of selected agencies and descriptions
+
+```{r 3-check-str-1, eval=FALSE, echo=FALSE}
+#check structure
+str(df1)
+```
+
+## Show Table: Selected Agencies, All Actions, Grouped by Year
+
+```{r 4-show-agency, eval=TRUE, echo=FALSE}
+#create table to display data
+datatable(t1, options = list( pageLength = 10, lengthMenu = c(10, 20, 40),   initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#01975b', 'color': '#fff'});",
+    "}")), rownames=TRUE)
+
+t1<-as.data.frame(t1)
+```
+
+## Show Table: Selected Agencies, All Actions, Columns by Year
+### The dataset was reshaped to show years as columns.
+
+```{r 5-graphbyyear, eval=TRUE, echo=FALSE}
+m2 <- dcast(t1, Agency + SectionName ~ Year)
+
+m1<-as.data.table(m2)
+
+datatable(m1, options = list( pageLength = 10, lengthMenu = c(10, 20, 40),   initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#01975b', 'color': '#fff'});",
+    "}")), rownames=TRUE)
+```
+
+## Show Table: Selected Agencies, Hiring Actions, Columns by Quarter
+
+```{r 6-import-summary-data, echo=FALSE}
+
+#import cleaned data
+df2 <- read.xlsx("df-agencybyqtr.xlsx", sheet=1, startRow=1, colNames=TRUE)
+
+#group by agency and action type
+
+datatable(df2, options = list( pageLength = 10, lengthMenu = c(10, 20, 40),   initComplete = JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': '#3498DB', 'color': '#fff'});",
+    "}")), rownames=TRUE)
+```
+
+
