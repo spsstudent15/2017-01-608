@@ -1,0 +1,98 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+library(openxlsx)
+
+df2 <- read.csv("df-agencybyqtr2.csv", stringsAsFactors = FALSE)  
+  
+
+  
+ui <- 
+  navbarPage("New York City Hiring Trends", id="nav", ##added
+             
+tabPanel("Introduction",
+         img(src="http://www1.nyc.gov/assets/designcommission/images/content/slideshows/1970-nyc-photo.jpg",
+             width = 400),    
+         p("p creates a paragraph of text."),
+
+             br(),
+             code("code displays your text similar to computer code"),
+             br()), ##added
+         
+tabPanel("Interactive Graph",    ##added
+  
+  fluidPage(    
+  # Give the page a title
+  titlePanel("NYC Hiring by Agency, 2014-2016"),
+  # Generate a row with a sidebar
+  sidebarLayout(      
+    # Define the sidebar with one input
+    sidebarPanel(
+      selectInput("agency", "Agency:", 
+                  choices=c("ACS",
+                            "Correction",
+                            "DCAS",
+                            "DDC",
+                            "DEP",
+                            "DHS",
+                            "DOB",
+                            "DOH",
+                            "DOT",
+                            "DPR",
+                            "DSNY",
+                            "FDNY",
+                            "HRA",
+                            "NYPD")),
+      hr(),
+      helpText("Source: NYC Open Data")
+    ),
+    
+    # Create a spot for the barplot
+    mainPanel(
+      plotOutput("qtrPlot",height=700)  
+    )
+    
+  )
+)
+),
+tabPanel("Insights",
+         img(src="http://www1.nyc.gov/assets/designcommission/images/content/slideshows/1970-nyc-photo.jpg", width = 400),    
+         p("p creates a paragraph of text."),
+         br(),
+         br(),
+         code("code displays your text similar to computer code"),
+         br()), ##added
+
+tabPanel("Sources and Further Reading") ##added
+) #added
+
+
+#############################################
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  # Fill in the spot we created for a plot
+  output$qtrPlot <- renderPlot({
+
+    
+    # Render a barplot
+    barplot(df2[,input$agency], 
+            main=input$agency,
+            ylab="Hires",
+            xlab="Quarter",
+            names.arg = df2$Agency,
+            col="blue")
+  })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+
