@@ -1,14 +1,4 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
-library(openxlsx)
 
 df2 <- read.csv("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/df-agencybyqtr.csv")  
   
@@ -46,7 +36,7 @@ server <- function(input, output) {
   output$qtrPlot <- renderPlot({
     
     # Render a barplot
-    plot(Agency,, 
+    plot(df2$Agency, 
             main=input$Agency,
             ylab="Hires",
             xlab="Quarter")

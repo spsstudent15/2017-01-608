@@ -1,17 +1,11 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+#Final Project Updated 20170515
+#Armenoush Aslanian-Persico
 
 library(shiny)
-library(openxlsx)
+#library(openxlsx)
 
 df2 <- read.csv("df-agencybyqtr2.csv", stringsAsFactors = FALSE)  
-  
+desc1 <- read.csv("desc.csv", stringsAsFactors = FALSE)  
 
   
 ui <- 
@@ -51,7 +45,8 @@ tabPanel("Interactive Graph",    ##added
                             "HRA",
                             "NYPD")),
       hr(),
-      helpText("Source: NYC Open Data")
+      helpText("Source: NYC Open Data"),
+      verbatimTextOutput('desc')
     ),
     
     # Create a spot for the barplot
@@ -75,10 +70,16 @@ tabPanel("Sources and Further Reading") ##added
 
 
 #############################################
+#SERVER
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
+  output$desc <- renderText({
+    desc1t<-subset(desc1, Agency==input$agency, select = "Desc")  
+    paste('You selected', desc1t)})
+          
   # Fill in the spot we created for a plot
   output$qtrPlot <- renderPlot({
 
