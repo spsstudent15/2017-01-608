@@ -1,0 +1,16 @@
+Agency,AgencyName,Color
+ACS,Administration of Children's Services,blue
+Correction,Department of Correction,gray
+DCAS,Department of Citywide Administrative Services,blue
+DDC,Department of Design and Construction,orange
+DEP,Department of Environmental Protection,green
+DHS,Department of Homeless Services,gray
+DOB,Department of Buildings,orange
+DOH,Department of Health,red
+DOT,Department of Transportation,green
+DPR,Department of Parks and Recreation,green
+DSNY,Department of Sanitation,green
+FDNY,Fire Department,red
+HRA,Human Resources Agency,gray
+NYPD,Police Department,blue
+All,All Agencies,black
