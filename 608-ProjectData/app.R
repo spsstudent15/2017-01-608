@@ -1,34 +1,45 @@
-#Final Project Updated 20170515
+#Final Project Updated 20170516-1230
 #Armenoush Aslanian-Persico
 
+
+#############################################
+#LOAD LIBRARIES AND DATA
+#############################################
+
 library(shiny)
+library(plotly)
 
 desc1 <- read.csv(url("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/desc.csv"), 
                   stringsAsFactors = FALSE)  
 
-df2 <- read.csv(url("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/app4/df-agencybyqtr2.csv"), 
+df2 <- read.csv(url("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/df-agencybyqtr2.csv"), 
                 stringsAsFactors = FALSE)  
 
+dfbudget <- read.csv(url("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/dfbudget.csv"), header=TRUE)
+dfbudget<-head(dfbudget,14)
 
 
-  
+#############################################
+#UI
+#############################################
+ 
 ui <- 
   navbarPage("New York City Hiring Trends", id="nav", ##added
              
 tabPanel("Introduction",
-         img(src="http://www.ohny.org/sites/default/files/M-MMB%20Cupola_Harald%20Hoyer%20%20via%20Wikimedia%20Commons.jpg", width = 600),    
-         p("Image Source: Open House New York"),
+         titlePanel("Who Runs New York City?"), 
+         img(src="http://freshkillspark.org/wp-content/uploads/2013/06/View-from-North-Mound-960x520.jpg", width = 600),    
+         p("Image Source: freshkillspark.org"),
+
              br(),
-             br()), 
+             br()
+        ), #end tabpanel 
          
 tabPanel("Interactive Graph",   
   
   fluidPage(    
-  # Give the page a title
-  titlePanel("NYC Hiring by Agency, 2014-2016"),
-  # Generate a row with a sidebar
+  titlePanel("Where Can I Get A Job?"),
   sidebarLayout(      
-    # Define the sidebar with one input
     sidebarPanel(
       selectInput("agency", "Agency:", 
                   choices=c("ACS",
@@ -51,33 +62,59 @@ tabPanel("Interactive Graph",
       
     ),
     
-    # Create a spot for the barplot
     mainPanel(
       plotOutput("qtrPlot",height=700)  
     )
     
   )
 )
-),
+), #end tabpanel
+
+
+tabPanel("Plotly Graph",
+         fluidPage(  
+           titlePanel("Where Are My Taxes Going?"), 
+           br(),
+           br(),
+           plotlyOutput("plot"), 
+                     br(),
+                     strong("What Does This Graph Show?"),
+                     p("For the selected agencies, the Y axis indicates the average number of hires in 2014 through 2016. 
+                       The X axis indicates the most recent projected budget for Fiscal Year 2018, which ends in June 2018. 
+                       An agency using less money while hiring more people could arguably be operating more efficiently."),
+                     br(),
+                      strong("What Doesn't This Consider?"),
+                     p("Some agencies have seasonal workers, such as Parks and Sanitation, who hire for summer recreation and winter snow removal. 
+                       These hiring counts may skew the data to make agencies appear more efficient than they are."),
+           p("The budget amount consists of more than just hiring costs. 
+             Personnel is usually the most significant budget expense. However, some agencies have substantial operating expenses which may be skewing this graph. "))
+  ), #end tabpanel
 
 tabPanel("Insights",
-         img(src="http://freshkillspark.org/wp-content/uploads/2013/06/View-from-North-Mound-960x520.jpg", width = 600),    
-         p("Image Source: freshkillspark.org"),
+         titlePanel("Why Should I Care?"),
+         img(src="http://www.ohny.org/sites/default/files/M-MMB%20Cupola_Harald%20Hoyer%20%20via%20Wikimedia%20Commons.jpg", width = 600),    
+         p("Image Source: Open House New York"),
          br(),
-         br()
-),
+         br(),
+         strong("Heading 1"),
+         p("Explanation of Insights"),
+         br(),
+         p("Additional Explanation")
+  ), #end tabpanel
 
 tabPanel("Sources",
+         titlePanel("Where Can I Learn More?"),
          img(src="http://www1.nyc.gov/assets/designcommission/images/content/slideshows/1970-nyc-photo.jpg", width = 400),    
          p("Image Source: NYC.gov"),
          br(),
          br()
-)
+  ) #end tabpanel
 
 )
+
 #############################################
 #SERVER
-
+#############################################
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -98,6 +135,18 @@ server <- function(input, output) {
             names.arg = df2$Agency,
             col="blue")
   })
+  
+  
+output$plot <- renderPlotly({
+  plot_ly(
+     dfbudget, x = ~FY18Budget, y = ~AvgHires,
+      # Hover text:
+      text = ~paste("Agency: ", Agency, '<br>Average Hires:', AvgHires),
+      color = ~AvgHires, size = ~AvgHires, marker=list(sizeref=0.05, sizemode="area"))%>%
+      
+      layout(title = "Agency Average Hires 2014-2016 vs. FY18 Budget")
+  })
+  
 }
 
 #Run the application 

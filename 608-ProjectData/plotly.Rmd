@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R Markdown
 
 
-```{r 1, warning=FALSE}
+```{r 1, warning=FALSE, eval=FALSE}
 library(plotly)
 
 d <- diamonds[sample(nrow(diamonds), 1000), ]
@@ -30,14 +30,17 @@ p
 ```{r 2, warning=FALSE}
 library(plotly)
 
-dfbudget <- read.csv("dfbudget.csv", header=TRUE)
+dfbudget <- read.csv(url("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/dfbudget.csv"), header=TRUE)
+dfbudget<-head(dfbudget,14)
 
-p <- plot_ly(
-  d, x = ~carat, y = ~price,
+plot1 <- plot_ly(
+  dfbudget, x = ~FY18Budget, y = ~AvgHires,
   # Hover text:
-  text = ~paste("Price: ", price, '$<br>Cut:', cut),
-  color = ~carat, size = ~carat
-)
+  text = ~paste("Agency: ", Agency, '<br>Average Hires:', AvgHires),
+  color = ~AvgHires, size = ~AvgHires)%>%
 
-p
+layout(title = "Agency Average Hires 2014-2016 vs. FY18 Budget")
+
+  
+plot1
 ```
