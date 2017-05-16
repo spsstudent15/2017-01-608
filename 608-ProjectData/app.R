@@ -1,4 +1,4 @@
-#Final Project Updated 20170516-1230
+#Final Project Updated 20170516-0145
 #Armenoush Aslanian-Persico
 
 
@@ -28,8 +28,8 @@ ui <-
              
 tabPanel("Introduction",
          titlePanel("Who Runs New York City?"), 
-         img(src="http://freshkillspark.org/wp-content/uploads/2013/06/View-from-North-Mound-960x520.jpg", width = 600),    
-         p("Image Source: freshkillspark.org"),
+         img(src="http://blog.ohny.org/wp-content/uploads/Q-New-York-State-Pavilion-Unisphere_credit-Brendan-Crain.jpg", width = 600),    
+         p("Image Source: OHNY.org"),
 
              br(),
              br()
@@ -79,7 +79,7 @@ tabPanel("Plotly Graph",
            plotlyOutput("plot"), 
                      br(),
                      strong("What Does This Graph Show?"),
-                     p("For the selected agencies, the Y axis indicates the average number of hires in 2014 through 2016. 
+                     p("For the selected agencies, the Y axis indicates the average number of yearly hires in 2014 through 2016. 
                        The X axis indicates the most recent projected budget for Fiscal Year 2018, which ends in June 2018. 
                        An agency using less money while hiring more people could arguably be operating more efficiently."),
                      br(),
@@ -96,7 +96,7 @@ tabPanel("Insights",
          p("Image Source: Open House New York"),
          br(),
          br(),
-         strong("Heading 1"),
+         strong("What's Interesting About the Data?"),
          p("Explanation of Insights"),
          br(),
          p("Additional Explanation")
@@ -104,10 +104,19 @@ tabPanel("Insights",
 
 tabPanel("Sources",
          titlePanel("Where Can I Learn More?"),
-         img(src="http://www1.nyc.gov/assets/designcommission/images/content/slideshows/1970-nyc-photo.jpg", width = 400),    
-         p("Image Source: NYC.gov"),
+         img(src="http://freshkillspark.org/wp-content/uploads/2013/06/View-from-North-Mound-960x520.jpg", width = 600),    
+         p("Image Source: freshkillspark.org"),
          br(),
-         br()
+         url <- a("Dataset for NYC Hiring and Procurement", href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx"),
+         br(),
+         url <- a("Github Repository for This Project", href="https://github.com/spsstudent15/2017-01-608/tree/master/608-ProjectData"),
+         br(),
+         url <- a("New York City's Office of Management and Budget", href="http://www1.nyc.gov/site/omb/index.page"),
+                  br(),
+         url <- a("Work for New York City!", href="http://www.nyc.gov/jobs"),
+         br(),
+         br(),
+         p("Thanks for viewing!")
   ) #end tabpanel
 
 )
@@ -133,7 +142,7 @@ server <- function(input, output) {
             ylab="Hires",
             xlab="Quarter",
             names.arg = df2$Agency,
-            col="blue")
+            col="#a5d6a7")
   })
   
   
