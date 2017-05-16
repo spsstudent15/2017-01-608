@@ -4,8 +4,13 @@
 library(shiny)
 #library(openxlsx)
 
-df2 <- read.csv("df-agencybyqtr2.csv", stringsAsFactors = FALSE)  
-desc1 <- read.csv("desc.csv", stringsAsFactors = FALSE)  
+desc1 <- read.csv(url("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/desc.csv"), 
+                  stringsAsFactors = FALSE)  
+
+df2 <- read.csv(url("https://raw.githubusercontent.com/spsstudent15/2017-01-608/master/608-ProjectData/app4/df-agencybyqtr2.csv"), 
+                stringsAsFactors = FALSE)  
+
+
 
   
 ui <- 
@@ -45,8 +50,9 @@ tabPanel("Interactive Graph",    ##added
                             "HRA",
                             "NYPD")),
       hr(),
-      helpText("Source: NYC Open Data"),
-      verbatimTextOutput('desc')
+      verbatimTextOutput('desc'),
+      helpText("Source: NYC Open Data, NYC.gov")
+      
     ),
     
     # Create a spot for the barplot
